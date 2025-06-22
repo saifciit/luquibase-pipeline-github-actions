@@ -37,7 +37,7 @@ jobs:
             --changelog-file=changelog/diff.xml
 
       - name: Upload changelog artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: diff-changelog
           path: changelog/diff.xml

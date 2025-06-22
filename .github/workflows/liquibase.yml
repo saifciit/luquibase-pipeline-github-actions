@@ -4,17 +4,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  diff-db:
+  liquibase-diff:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Liquibase
+      - name: Install Liquibase
         run: |
-          curl -s https://download.liquibase.com/liquibase-4.23.0.tar.gz | tar xz
-          sudo mv liquibase /usr/local/bin
+          wget https://github.com/liquibase/liquibase/releases/download/v4.23.0/liquibase-4.23.0.tar.gz
+          tar -xf liquibase-4.23.0.tar.gz
+          sudo mv liquibase /usr/local/bin/
+
+      - name: Download PostgreSQL JDBC Driver
+        run: |
+          wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
 
       - name: Run Liquibase Diff
         run: |
@@ -24,5 +29,5 @@ jobs:
             --url=jdbc:postgresql://${{ secrets.PROD_DB_HOST }}/auroradev \
             --username=${{ secrets.DB_USER }} \
             --password=${{ secrets.DB_PASSWORD }} \
-            --changeLogFile=diff.xml \
+            --changeLogFile=changelog/diff.xml \
             diffChangeLog

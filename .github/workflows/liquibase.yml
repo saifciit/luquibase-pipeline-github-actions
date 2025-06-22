@@ -34,10 +34,10 @@ jobs:
             --username=${{ secrets.DB_USER }} \
             --password=${{ secrets.DB_PASSWORD }} \
             diffChangeLog \
-            --changelog-file=changelog/diff.xml
+            --changelog-file=db/changelog/changelog-master.xml \
 
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v4
         with:
           name: diff-changelog
-          path: changelog/diff.xml
+          path: db/changelog/changelog-master.xml

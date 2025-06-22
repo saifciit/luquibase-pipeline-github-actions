@@ -28,13 +28,15 @@ jobs:
       - name: Run Liquibase Diff
         run: |
           ./liquibase/liquibase \
-            --classpath=liquibase/postgresql.jar \
-            --referenceUrl=jdbc:postgresql://${{ secrets.DEV_DB_HOST }} \
-            --url=jdbc:postgresql://${{ secrets.PROD_DB_HOST }} \
-            --username=${{ secrets.DB_USER }} \
-            --password=${{ secrets.DB_PASSWORD }} \
-            diffChangeLog \
-            --changelog-file=db/changelog/db.changelog-master.xml \
+          --classpath=liquibase/postgresql.jar \
+          --url="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/auroradev" \
+          --username=postgres \
+          --password=*Gatsby1975 \
+          --referenceUrl="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/aurorastg" \
+          --referenceUsername=postgres \
+          --referencePassword=*Gatsby1975 \
+          --changelog-file=db/changelog/db.changelog-master.xml \
+          diffChangeLog \
 
       - name: Upload changelog artifact
         uses: actions/upload-artifact@v4

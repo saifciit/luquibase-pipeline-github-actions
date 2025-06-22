@@ -16,7 +16,7 @@ jobs:
 
       - name: Download and extract Liquibase
         run: |
-          curl -L https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.zip -o liquibase.zip
+          curl -L https://github.com/liquibase/liquibase/releases/download/v4.23.0/liquibase-4.23.0.zip -o liquibase.zip
           unzip liquibase.zip -d liquibase
           chmod +x liquibase/liquibase
 

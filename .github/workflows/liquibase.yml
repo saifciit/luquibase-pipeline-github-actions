@@ -14,12 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download Liquibase
+      - name: Download and extract Liquibase
         run: |
-          curl -L https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.tar.gz -o liquibase.tar.gz
-          mkdir liquibase
-          tar -xzf liquibase.tar.gz -C liquibase --strip-components=1
+          curl -L https://github.com/liquibase/liquibase/releases/download/v${LIQUIBASE_VERSION}/liquibase-${LIQUIBASE_VERSION}.zip -o liquibase.zip
+          unzip liquibase.zip -d liquibase
           chmod +x liquibase/liquibase
+
 
       - name: Download PostgreSQL JDBC driver
         run: |

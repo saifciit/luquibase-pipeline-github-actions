@@ -1,0 +1,16 @@
+  - name: Compare Dev vs Prod and Apply to Staging
+    run: |
+      liquibase \
+        --referenceUrl=jdbc:postgresql://${{ secrets.DEV_DB_HOST }}/auroradev \
+        --url=jdbc:postgresql://${{ secrets.PROD_DB_HOST }}/auroradev \
+        --changeLogFile=changes/diff-prod.xml \
+        --username=${{ secrets.DB_USER }} \
+        --password=${{ secrets.DB_PASSWORD }} \
+        diffChangeLog
+
+    liquibase \
+      --url=jdbc:postgresql://${{ secrets.STAGE_DB_HOST }}/auroradev \
+      --changeLogFile=changes/diff-prod.xml \
+      --username=${{ secrets.DB_USER }} \
+      --password=${{ secrets.DB_PASSWORD }} \
+      update

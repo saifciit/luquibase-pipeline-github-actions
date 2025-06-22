@@ -1,4 +1,4 @@
-name: Liquibase Diff
+name: Liquibase Aurora Schema Diff
 
 on:
   workflow_dispatch:
@@ -11,22 +11,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Liquibase
+      - name: Download and Extract Liquibase
         run: |
           wget https://github.com/liquibase/liquibase/releases/download/v4.23.0/liquibase-4.23.0.tar.gz
-          tar -xf liquibase-4.23.0.tar.gz
-          sudo mv liquibase /usr/local/bin/
+          mkdir liquibase
+          tar -xzf liquibase-4.23.0.tar.gz -C liquibase --strip-components=1
 
       - name: Download PostgreSQL JDBC Driver
         run: |
           wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
 
-      - name: Run Liquibase Diff
+      - name: Run Liquibase Diff between Dev and Prod
         run: |
-          liquibase \
+          ./liquibase/liquibase \
             --classpath=postgresql-42.7.3.jar \
-            --referenceUrl=jdbc:postgresql://${{ secrets.DEV_DB_HOST }}/auroradev \
-            --url=jdbc:postgresql://${{ secrets.PROD_DB_HOST }}/auroradev \
+            --referenceUrl=jdbc:postgresql://${{ secrets.DEV_DB_HOST }}:5432/auroradev \
+            --url=jdbc:postgresql://${{ secrets.PROD_DB_HOST }}:5432/auroradev \
             --username=${{ secrets.DB_USER }} \
             --password=${{ secrets.DB_PASSWORD }} \
             --changeLogFile=changelog/diff.xml \

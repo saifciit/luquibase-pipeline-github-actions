@@ -26,8 +26,8 @@ jobs:
         run: |
           atlas schema diff \
             --dev-url "docker://postgres/15" \
-            --from "${{ secrets.URLDEV }}" \
-            --to "${{ secrets.URLSTG }}" \
+            --from "${{ secrets.URLSTG }}" \
+            --to "${{ secrets.URLDEV }}" \
             > db/migration.sql
 
       - name: Show generated SQL

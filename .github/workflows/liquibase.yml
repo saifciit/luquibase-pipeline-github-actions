@@ -20,7 +20,6 @@ jobs:
           unzip liquibase.zip -d liquibase
           chmod +x liquibase/liquibase
 
-
       - name: Download PostgreSQL JDBC driver
         run: |
           curl -L -o liquibase/postgresql.jar https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
@@ -37,7 +36,10 @@ jobs:
             --referencePassword='*Gatsby1975' \
             --changelog-file=db/changelog/db.changelog-master.xml \
             diffChangeLog
-      
+
+          # Fix invalid XML declaration for Liquibase compatibility
+          sed -i '1s/<?xml version="1.1"/<?xml version="1.0"/' db/changelog/db.changelog-master.xml
+
           echo "==== CHANGELOG DIFF ===="
           cat db/changelog/db.changelog-master.xml
 

@@ -15,6 +15,9 @@ jobs:
         run: |
           curl -sSf https://atlasgo.io/install.sh | sh
           echo "$HOME/.atlas/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.atlas/bin:$PATH"
+          which atlas
+          atlas version
 
       - name: Create atlas.hcl config
         run: |
@@ -28,12 +31,13 @@ jobs:
 
       - name: Run Atlas schema diff
         run: |
+          export PATH="$HOME/.atlas/bin:$PATH"
           atlas schema diff \
             --dev-url "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
             --format atlas > db/migration.sql
 
-      - name: Output schema diff
+      - name: Show migration SQL
         run: cat db/migration.sql
 
       - name: Upload diff artifact

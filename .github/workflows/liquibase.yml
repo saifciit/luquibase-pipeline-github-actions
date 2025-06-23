@@ -11,10 +11,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Atlas CLI
+      - name: Install Atlas CLI (manual method)
         run: |
-          curl -sSf https://install.atlasgo.io | sh
-          sudo mv ./bin/atlas /usr/local/bin
+          curl -Lo atlas.tar.gz https://github.com/ariga/atlas/releases/latest/download/atlas-linux-amd64.tar.gz
+          mkdir -p ./atlas-bin
+          tar -xzf atlas.tar.gz -C ./atlas-bin
+          sudo mv ./atlas-bin/atlas /usr/local/bin
 
       - name: Setup migration directory
         run: mkdir -p atlas/migrations
@@ -27,9 +29,6 @@ jobs:
             --to "${{ secrets.URLSTG }}" \
             --dev-url "docker://postgres/15" \
             --name "auto_diff"
-
-      - name: Show generated migration files
-        run: ls -l atlas/migrations
 
       - name: Apply migration to staging
         run: |

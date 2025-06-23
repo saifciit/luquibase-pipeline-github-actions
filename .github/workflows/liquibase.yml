@@ -11,27 +11,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Atlas CLI
+      - name: Install Atlas CLI (latest method)
         run: |
-          curl -sSf https://atlasgo.io/install.sh | sh
+          curl -s https://atlasgo.sh | bash
           echo "$HOME/.atlas/bin" >> $GITHUB_PATH
-          export PATH="$HOME/.atlas/bin:$PATH"
-          which atlas
-          atlas version
 
-      - name: Create atlas.hcl config
+      - name: Verify Atlas CLI
         run: |
-          mkdir -p db
-          cat <<EOF > db/atlas.hcl
-          env "default" {
-            dev = "${{ secrets.URLDEV }}"
-            url = "${{ secrets.URLSTG }}"
-          }
-          EOF
+          atlas version
 
       - name: Run Atlas schema diff
         run: |
-          export PATH="$HOME/.atlas/bin:$PATH"
           atlas schema diff \
             --dev-url "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \

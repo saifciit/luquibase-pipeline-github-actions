@@ -14,7 +14,11 @@ jobs:
       - name: Install Atlas CLI
         run: |
           curl -sSf https://atlasgo.io/install.sh | sh
-          echo "$HOME/.atlas/bin" >> $GITHUB_PATH
+        env:
+          ATLAS_INSTALL_DIR: ${{ runner.temp }}/.atlas
+
+      - name: Add Atlas to PATH
+        run: echo "${{ runner.temp }}/.atlas/bin" >> $GITHUB_PATH
 
       - name: Create atlas.hcl config
         run: |
@@ -28,15 +32,13 @@ jobs:
 
       - name: Run Atlas schema diff
         run: |
-          atlas schema diff \
+          ${{ runner.temp }}/.atlas/bin/atlas schema diff \
             --dev-url "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
             --format atlas > db/migration.sql
 
       - name: Output schema diff
-        run: |
-          echo "==== Schema Diff ===="
-          cat db/migration.sql
+        run: cat db/migration.sql
 
       - name: Upload diff artifact
         uses: actions/upload-artifact@v4

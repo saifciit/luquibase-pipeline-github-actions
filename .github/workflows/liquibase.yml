@@ -27,6 +27,13 @@ jobs:
       - name: Show migration SQL
         run: cat db/migration.sql
 
+      - name: Apply migration to target (STG)
+        run: |
+          atlas schema apply \
+            --url "${{ secrets.URLSTG }}" \
+            --to file://db/migration.sql \
+            --auto-approve
+
       - name: Upload diff artifact
         uses: actions/upload-artifact@v4
         with:

@@ -13,9 +13,10 @@ jobs:
 
       - name: Install Atlas CLI (v0.36.0)
         run: |
-          curl -Lo atlas https://release.ariga.io/atlas/atlas-community-linux-amd64-v0.36.0
+          curl -sSf https://release.ariga.io/atlas/atlas-community-linux-amd64-v0.36.0 -o atlas
           chmod +x atlas
           sudo mv atlas /usr/local/bin/atlas
+
 
       - name: Run Atlas Schema Diff and show output
         run: |

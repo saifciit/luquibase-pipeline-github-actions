@@ -30,9 +30,9 @@ jobs:
       - name: Apply migration to target (STG)
         run: |
           atlas schema apply \
-            --dev-url "docker://postgres/15/dev?search_path=public"
             --url "${{ secrets.URLSTG }}" \
             --to file://db/migration.sql \
+            --dev-url "docker://postgres/15/dev?search_path=public"
             --auto-approve
 
       - name: Upload diff artifact

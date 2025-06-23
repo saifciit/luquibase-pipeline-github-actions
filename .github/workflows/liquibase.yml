@@ -41,3 +41,18 @@ jobs:
           echo "==== CHANGELOG DIFF ===="
           cat db/changelog/db.changelog-master.xml
 
+      - name: Apply Changelog to Target (auroradev)
+        run: |
+          ./liquibase/liquibase \
+            --classpath=liquibase/postgresql.jar \
+            --url="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/auroradev" \
+            --username=postgres \
+            --password=*Gatsby1975 \
+            --changeLogFile=db/changelog/db.changelog-master.xml \
+            update
+
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: diff-changelog
+          path: db/changelog/db.changelog-master.xml

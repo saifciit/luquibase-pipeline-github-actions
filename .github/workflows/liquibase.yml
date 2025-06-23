@@ -1,44 +1,44 @@
-name: Atlas PostgreSQL Schema Diff
+name: Atlas Schema Diff and Migrate
 
 on:
   workflow_dispatch:
 
 jobs:
-  atlas-diff:
+  atlas-migrate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Atlas CLI (latest method)
+      - name: Install Atlas CLI
         run: |
-          curl -s https://atlasgo.sh | bash
-          echo "$HOME/.atlas/bin" >> $GITHUB_PATH
+          curl -sSf https://install.atlasgo.io | sh
+          sudo mv ./bin/atlas /usr/local/bin
 
-      - name: Verify Atlas CLI
-        run: |
-          atlas version
+      - name: Setup migration directory
+        run: mkdir -p atlas/migrations
 
-      - name: Run Atlas schema diff
+      - name: Generate migration
         run: |
-          atlas schema diff \
+          atlas migrate diff \
+            --dir atlas/migrations \
             --from "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
-            --format atlas > db/migration.sql
+            --dev-url "docker://postgres/15" \
+            --name "auto_diff"
 
-      - name: Show migration SQL
-        run: cat db/migration.sql
+      - name: Show generated migration files
+        run: ls -l atlas/migrations
 
       - name: Apply migration to staging
         run: |
-          atlas schema apply \
-            --from file://db/migration.sql \
-            --to "${{ secrets.URLSTG }}" \
-            --auto-approve
+          atlas migrate apply \
+            --dir atlas/migrations \
+            --url "${{ secrets.URLSTG }}"
 
-      - name: Upload migration.sql as artifact
+      - name: Upload migration directory
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-migration
-          path: db/migration.sql
+          name: atlas-migrations
+          path: atlas/migrations

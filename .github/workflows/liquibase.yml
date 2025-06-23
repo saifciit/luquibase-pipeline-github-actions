@@ -1,46 +1,43 @@
-name: Atlas PostgreSQL Schema Diff
+name: Atlas PostgreSQL Schema Diff and Apply
 
 on:
   workflow_dispatch:
 
 jobs:
-  atlas-diff:
+  atlas-migration:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Atlas CLI (latest method)
+      - name: Install Atlas CLI
         run: |
           curl -s https://atlasgo.sh | bash
           echo "$HOME/.atlas/bin" >> $GITHUB_PATH
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Verify Atlas CLI
-        run: |
-          atlas version
-          
-      - name: Run Atlas schema diff
+        run: atlas version
+
+      - name: Generate migration SQL (DEV → STG)
         run: |
           atlas schema diff \
+            --dev-url "docker://postgres/15" \
             --from "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
-            --dev-url "docker://postgres/15" \
-            --format "{{ sql .Changes }}" > db/migration.sql
-  
-      - name: Show migration SQL
+            > db/migration.sql
+
+      - name: Show generated SQL
         run: cat db/migration.sql
-      
-      - name: Apply migration SQL using psql
+
+      - name: Apply SQL to Staging DB
         run: |
-          sudo apt-get update && sudo apt-get install -y postgresql-client
-          PGPASSWORD='${{ secrets.DB_PASSWORD }}' psql \
-            -h auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com,5432 \
-            -U postgres \
-            -d aurorastg \
-            -f db/migration.sql
+          psql "${{ secrets.URLSTG }}" -f db/migration.sql
 
-
-      - name: Upload diff artifact
+      - name: Upload SQL artifact
         uses: actions/upload-artifact@v4
         with:
           name: atlas-schema-diff

@@ -25,7 +25,7 @@ jobs:
         run: |
           curl -L -o liquibase/postgresql.jar https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
 
-      - name: Run Liquibase Diff
+      - name: Run Liquibase Diff and Show Output
         run: |
           ./liquibase/liquibase \
             --classpath=liquibase/postgresql.jar \
@@ -35,11 +35,9 @@ jobs:
             --referenceUrl="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/aurorastg" \
             --referenceUsername=postgres \
             --referencePassword='*Gatsby1975' \
-            --changeLogFile=db/changelog/db.changelog-master.xml \
+            --changelog-file=db/changelog/db.changelog-master.xml \
             diffChangeLog
+      
+          echo "==== CHANGELOG DIFF ===="
+          cat db/changelog/db.changelog-master.xml
 
-      - name: Upload changelog artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: diff-changelog
-          path: db/changelog/db.changelog-master.xml

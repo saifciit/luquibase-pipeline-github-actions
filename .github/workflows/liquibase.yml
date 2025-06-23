@@ -1,60 +1,45 @@
-name: Liquibase Aurora Schema Diff
+name: Atlas PostgreSQL Schema Diff
 
 on:
   workflow_dispatch:
 
 jobs:
-  liquibase-diff:
+  atlas-diff:
     runs-on: ubuntu-latest
 
-    env:
-      LIQUIBASE_VERSION: 4.23.0
-
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download and extract Liquibase
+      - name: Install Atlas CLI
         run: |
-          curl -L https://github.com/liquibase/liquibase/releases/download/v4.23.0/liquibase-4.23.0.zip -o liquibase.zip
-          unzip liquibase.zip -d liquibase
-          chmod +x liquibase/liquibase
+          curl -sSf https://atlasgo.io/install.sh | sh
+          echo "$HOME/.atlas/bin" >> $GITHUB_PATH
 
-      - name: Download PostgreSQL JDBC driver
+      - name: Create atlas.hcl config
         run: |
-          curl -L -o liquibase/postgresql.jar https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
+          mkdir -p db
+          cat <<EOF > db/atlas.hcl
+          env "default" {
+            dev = "${{ secrets.URLDEV }}"
+            url = "${{ secrets.URLSTG }}"
+          }
+          EOF
 
-      - name: Run Liquibase Diff and Show Output
+      - name: Run Atlas schema diff
         run: |
-          ./liquibase/liquibase \
-            --classpath=liquibase/postgresql.jar \
-            --url="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/auroradev" \
-            --username=postgres \
-            --password='*Gatsby1975' \
-            --referenceUrl="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/aurorastg" \
-            --referenceUsername=postgres \
-            --referencePassword='*Gatsby1975' \
-            --changelog-file=db/changelog/db.changelog-master.xml \
-            diffChangeLog
+          atlas schema diff \
+            --dev-url "${{ secrets.URLDEV }}" \
+            --to "${{ secrets.URLSTG }}" \
+            --format atlas > db/migration.sql
 
-          echo "==== FIXING XML VERSION TO 1.0 ===="
-          sed -i '1s/version="1.1"/version="1.0"/' db/changelog/db.changelog-master.xml
-
-          echo "==== CHANGELOG DIFF ===="
-          cat db/changelog/db.changelog-master.xml
-
-      - name: Apply Changelog to Target (auroradev)
+      - name: Output schema diff
         run: |
-          ./liquibase/liquibase \
-            --classpath=liquibase/postgresql.jar \
-            --url="jdbc:postgresql://auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com:5432/auroradev" \
-            --username=postgres \
-            --password=*Gatsby1975 \
-            --changeLogFile=db/changelog/db.changelog-master.xml \
-            update
+          echo "==== Schema Diff ===="
+          cat db/migration.sql
 
-      - name: Upload changelog artifact
+      - name: Upload diff artifact
         uses: actions/upload-artifact@v4
         with:
-          name: diff-changelog
-          path: db/changelog/db.changelog-master.xml
+          name: atlas-schema-diff
+          path: db/migration.sql

@@ -30,8 +30,15 @@ jobs:
       - name: Show migration SQL
         run: cat db/migration.sql
 
-      - name: Upload diff artifact
+      - name: Apply migration to staging
+        run: |
+          atlas schema apply \
+            --from file://db/migration.sql \
+            --to "${{ secrets.URLSTG }}" \
+            --auto-approve
+
+      - name: Upload migration.sql as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-schema-diff
+          name: atlas-migration
           path: db/migration.sql

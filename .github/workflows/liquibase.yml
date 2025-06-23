@@ -11,17 +11,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Atlas CLI (v0.35.0)
+      - name: Install Atlas CLI (v0.36.0)
         run: |
-          curl -Lo atlas https://release.ariga.io/atlas/atlas-community-linux-amd64-v0.35.0
+          curl -Lo atlas https://release.ariga.io/atlas/atlas-community-linux-amd64-v0.36.0
           chmod +x atlas
           sudo mv atlas /usr/local/bin/atlas
 
-      - name: Preview Schema Changes (STG → DEV)
+      - name: Run Atlas Schema Diff and show output
         run: |
           atlas schema diff \
-            --to "${{ secrets.URLDEV }}" \
             --from "${{ secrets.URLSTG }}" \
+            --to "${{ secrets.URLDEV }}" \
             --dev-url "docker://postgres/15" \
             --log sql
 

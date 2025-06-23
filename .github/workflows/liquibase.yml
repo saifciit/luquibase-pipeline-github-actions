@@ -4,32 +4,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  atlas-diff-apply:
+  atlas-sync:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Atlas CLI (v0.36.0)
+      - name: Install Atlas CLI (v0.35.0)
         run: |
-          curl -sSf https://release.ariga.io/atlas/atlas-community-linux-amd64-v0.36.0 -o atlas
+          curl -Lo atlas https://release.ariga.io/atlas/atlas-community-linux-amd64-v0.35.0
           chmod +x atlas
           sudo mv atlas /usr/local/bin/atlas
 
+      - name: Setup migration directory
+        run: mkdir -p atlas/migrations
 
-      - name: Run Atlas Schema Diff and show output
+      - name: Generate and preview diff (STG → DEV)
         run: |
-          atlas schema diff \
+          atlas migrate diff \
+            --dir atlas/migrations \
             --from "${{ secrets.URLSTG }}" \
-            --to "${{ secrets.URLDEV }}" \
-            --dev-url "docker://postgres/15" \
-            --log sql
+            --to "${{ secrets.URLDEV }}"
+          echo "=== Generated SQL Diff: ==="
+          ls atlas/migrations/*.sql
+          cat atlas/migrations/*.sql
 
-      - name: Apply Schema Changes to DEV
+      - name: Apply changes to DEV
         run: |
-          atlas schema apply \
-            --to "${{ secrets.URLDEV }}" \
-            --from "${{ secrets.URLSTG }}" \
-            --dev-url "docker://postgres/15" \
-            --auto-approve
+          atlas migrate apply \
+            --dir atlas/migrations \
+            --url "${{ secrets.URLDEV }}"
+
+      - name: Upload migration files
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-migrations
+          path: atlas/migrations

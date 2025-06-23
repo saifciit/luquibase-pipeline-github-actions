@@ -23,7 +23,7 @@ jobs:
       - name: Run Atlas schema diff
         run: |
           atlas schema diff \
-            --dev-url "${{ secrets.URLDEV }}" \
+            --from "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
             --format atlas > db/migration.sql
 

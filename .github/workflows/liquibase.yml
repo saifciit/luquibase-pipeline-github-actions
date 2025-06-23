@@ -37,9 +37,9 @@ jobs:
             --changelog-file=db/changelog/db.changelog-master.xml \
             diffChangeLog
 
-          # Fix invalid XML declaration for Liquibase compatibility
-          sed -i '1s/^\xEF\xBB\xBF<?xml version="1.1"/<?xml version="1.0"/' db/changelog/db.changelog-master.xml
-          sed -i '1s/^[[:space:]]*<?xml version="1.1"/<?xml version="1.0"/' db/changelog/db.changelog-master.xml
+          echo "==== UPDATE XML TO 1.0 ===="
+          # Force fix XML version declaration for Liquibase compatibility
+          sed -i '1s/<?xml version="1.1" encoding="UTF-8" standalone="no"?>/<?xml version="1.0" encoding="UTF-8"?>/' db/changelog/db.changelog-master.xml
 
           echo "==== CHANGELOG DIFF ===="
           cat db/changelog/db.changelog-master.xml

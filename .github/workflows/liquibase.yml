@@ -22,21 +22,23 @@ jobs:
       - name: Run Atlas schema diff
         run: |
           atlas schema diff \
-            --from "${{ secrets.URLDEV }}" \
-            --to "${{ secrets.URLSTG }}" \
+            --from "${{ secrets.URLSTG }}" \
+            --to "${{ secrets.URLDEV }}" \
             --dev-url "docker://postgres/15" \
             --format sql > db/migration.sql
   
       - name: Show migration SQL
         run: cat db/migration.sql
       
-      - name: Apply DEV schema directly to STG
+      - name: Apply migration SQL using psql
         run: |
-          atlas schema apply \
-            --url "${{ secrets.URLSTG }}" \
-            --dev-url "docker://postgres/15" \
-            --to "file://db/migration.sql" \
-            --auto-approve
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          PGPASSWORD='${{ secrets.DB_PASSWORD }}' psql \
+            -h auroradev-instance-1.clqsa8muy6bd.us-east-2.rds.amazonaws.com,5432 \
+            -U postgres \
+            -d aurorastg \
+            -f db/migration.sql
+
 
       - name: Upload diff artifact
         uses: actions/upload-artifact@v4

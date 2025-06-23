@@ -18,21 +18,24 @@ jobs:
       - name: Verify Atlas CLI
         run: |
           atlas version
+          
       - name: Run Atlas schema diff
         run: |
           atlas schema diff \
             --from "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
-            --format atlas > db/migration.sql
+            --dev-url "docker://postgres/15" \
+            --format sql > db/migration.sql
+  
       - name: Show migration SQL
         run: cat db/migration.sql
-
-      - name: Apply migration to target (STG)
+      
+      - name: Apply DEV schema directly to STG
         run: |
           atlas schema apply \
             --url "${{ secrets.URLSTG }}" \
-            --to file://db/migration.sql \
-            --dev-url "docker://postgres/15/dev?search_path=public"
+            --dev-url "docker://postgres/15" \
+            --to "file://db/migration.sql" \
             --auto-approve
 
       - name: Upload diff artifact

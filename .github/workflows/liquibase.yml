@@ -25,7 +25,7 @@ jobs:
             --from "${{ secrets.URLDEV }}" \
             --to "${{ secrets.URLSTG }}" \
             --dev-url "docker://postgres/15" \
-            --format sql > db/migration.sql
+            --format "{{ sql .Changes }}" > db/migration.sql
   
       - name: Show migration SQL
         run: cat db/migration.sql

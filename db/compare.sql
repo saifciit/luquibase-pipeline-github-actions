@@ -4,5 +4,4 @@
 -- Please report an issue for any failure with the reproduction steps. 
  BEGIN; 
  ALTER TABLE IF EXISTS public.department DROP COLUMN IF EXISTS updated_datetime;
-
  END;

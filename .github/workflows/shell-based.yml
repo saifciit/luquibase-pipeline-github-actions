@@ -1,4 +1,4 @@
-name: Apply Latest Schema SQL to Target DB
+name: Shell based - SQL to Target DB
 
 on:
   push:

@@ -1,0 +1,31 @@
+name: Apply Latest Schema SQL to Target DB
+
+on:
+  push:
+    paths:
+      - db/compare_*.sql
+  workflow_dispatch:
+
+jobs:
+  apply-schema:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Find Latest Compare SQL File
+        id: find_sql
+        shell: bash
+        run: |
+          latest_file=$(ls db/compare_*.sql | sort -V | tail -n 1)
+          echo "sql_file=$latest_file" >> $GITHUB_OUTPUT
+
+      - name: Show SQL for verification
+        shell: bash
+        run: cat "${{ steps.find_sql.outputs.sql_file }}"
+
+      - name: Apply SQL to Target DB (Staging)
+        shell: bash
+        run: |
+          psql "${{ secrets.URLSTG }}" -f "${{ steps.find_sql.outputs.sql_file }}"

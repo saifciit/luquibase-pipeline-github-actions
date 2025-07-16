@@ -4,6 +4,6 @@
 -- Please report an issue for any failure with the reproduction steps. 
  BEGIN; 
  ALTER TABLE IF EXISTS public.location
-    ADD COLUMN postalcc character varying COLLATE pg_catalog."default";
+    ADD COLUMN postalcc_two character varying COLLATE pg_catalog."default";
 
  END;

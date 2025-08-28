@@ -2,6 +2,8 @@ name: Shell based - SQL to Target DB
 
 on:
   push:
+    branches:
+      - main
     paths:
       - db/compare_*.sql
   workflow_dispatch:

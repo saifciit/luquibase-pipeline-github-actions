@@ -31,3 +31,7 @@ jobs:
         shell: bash
         run: |
           psql "${{ secrets.URLSTG }}" -f "${{ steps.find_sql.outputs.sql_file }}"
+
+          # Move the file to the migrated folder only if the psql command was successful
+          mkdir -p migrated
+          mv "${{ steps.find_sql.outputs.sql_file }}" migrated/

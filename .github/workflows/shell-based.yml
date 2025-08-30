@@ -33,8 +33,19 @@ jobs:
           psql "${{ secrets.URLSTG }}" -f "${{ steps.find_sql.outputs.sql_file }}"
 
 
-      - name: Move SQL File to Migrated
-        shell: bash
+      - name: Move and Commit SQL File
+        shell: pwsh
         run: |
-          mkdir -p migrated
-          mv "${{ steps.find_sql.outputs.sql_file }}" migrated/
+          # Create the migrated folder if it doesn't exist
+          New-Item -ItemType Directory -Force -Path "migrated"
+          
+          # Move the file and stage the changes
+          Move-Item -Path "${{ steps.find_sql.outputs.sql_file }}" -Destination "migrated/"
+          git add -f "migrated"
+          git add -f "${{ steps.find_sql.outputs.sql_file }}"
+          
+          # Commit the changes
+          git commit -m "chore: Migrate ${{ steps.find_sql.outputs.sql_file }}"
+          
+          # Push the changes
+          git push
